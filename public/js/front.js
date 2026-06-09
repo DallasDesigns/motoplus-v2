@@ -134,3 +134,16 @@ jQuery(function ($) {
         $('#mp-img-num').text(idx);
     });
 });
+
+    // ── Click tracking (WhatsApp, phone, enquiry click) ─────────────────────
+    $(document).on('click', '.mp-track-click', function () {
+        var vehicleId = $(this).data('vehicle-id');
+        var eventType = $(this).data('event');
+        if ( vehicleId && eventType ) {
+            var d = new FormData();
+            d.append('action',     'motoplus_track');
+            d.append('vehicle_id', vehicleId);
+            d.append('event_type', eventType);
+            fetch(motoplusFront.ajaxUrl, { method:'POST', body:d, credentials:'same-origin' });
+        }
+    });

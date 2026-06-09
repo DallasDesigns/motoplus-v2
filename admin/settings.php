@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action( 'admin_menu', 'motoplus_admin_menu' );
 function motoplus_admin_menu() {
     add_submenu_page('edit.php?post_type='.MOTOPLUS_CPT, 'Dashboard',        'Dashboard',  'edit_posts',    'motoplus-dashboard', 'motoplus_dashboard_page');
+    add_submenu_page('edit.php?post_type='.MOTOPLUS_CPT, 'Analytics',        'Analytics',  'edit_posts',    'motoplus-analytics', 'motoplus_analytics_page');
     add_submenu_page('edit.php?post_type='.MOTOPLUS_CPT, 'Import Vehicle',   'Import',     'edit_posts',    'motoplus-import',    'motoplus_import_page');
     add_submenu_page('edit.php?post_type='.MOTOPLUS_CPT, 'Motoplus Settings','Settings',   'manage_options','motoplus-settings',  'motoplus_settings_page');
 }
@@ -31,6 +32,7 @@ function motoplus_sanitize_settings($input) {
         'lookup_provider'    => sanitize_text_field($input['lookup_provider'] ?? 'manual'),
         'lookup_api_key'     => sanitize_text_field($input['lookup_api_key'] ?? ''),
         'openai_api_key'     => sanitize_text_field($input['openai_api_key'] ?? ''),
+        'whatsapp_number'    => sanitize_text_field($input['whatsapp_number']  ?? ''),
     ];
 }
 
@@ -107,6 +109,11 @@ function motoplus_settings_page() {
                             <th>OpenAI API Key</th>
                             <td><input class="regular-text" type="password" name="<?php echo $o; ?>[openai_api_key]" value="<?php echo esc_attr($s['openai_api_key']); ?>" />
                             <p class="description">Optional. If set, the AI description button uses GPT-4o-mini. Otherwise a local template is used.</p></td>
+                        </tr>
+                        <tr>
+                            <th>WhatsApp Number</th>
+                            <td><input class="regular-text" type="text" name="<?php echo $o; ?>[whatsapp_number]" value="<?php echo esc_attr($s['whatsapp_number']); ?>" placeholder="07700 900000" />
+                            <p class="description">Displays a WhatsApp button on every listing. Uses dealer phone number if left blank. Enter in UK format e.g. 07700 900000</p></td>
                         </tr>
                     </table>
                 </div>

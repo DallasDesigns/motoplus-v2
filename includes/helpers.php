@@ -20,6 +20,7 @@ function motoplus_settings() {
         'lookup_provider'    => 'manual',
         'lookup_api_key'     => '',
         'openai_api_key'     => '',
+        'whatsapp_number'    => '',
     ]);
 }
 

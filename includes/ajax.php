@@ -93,6 +93,11 @@ function motoplus_ajax_submit_lead() {
     $body    = "Vehicle: {$vehicle_title}\nName: {$name}\nPhone: {$phone}\nEmail: {$email}\n\nMessage:\n{$message}";
     wp_mail( $s['lead_email'], $subject, $body );
 
+    // Track enquiry sent in analytics
+    if ( function_exists('motoplus_record_event') ) {
+        motoplus_record_event( $vehicle_id, 'enquiry_sent' );
+    }
+
     wp_send_json_success(['message'=>"Thanks {$name}! We'll be in touch shortly."]);
 }
 

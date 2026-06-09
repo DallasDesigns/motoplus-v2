@@ -26,6 +26,8 @@ require_once MOTOPLUS_DIR . 'includes/single-template.php';
 require_once MOTOPLUS_DIR . 'admin/settings.php';
 require_once MOTOPLUS_DIR . 'admin/dashboard.php';
 require_once MOTOPLUS_DIR . 'admin/import.php';
+require_once MOTOPLUS_DIR . 'includes/analytics.php';
+require_once MOTOPLUS_DIR . 'admin/analytics.php';
 
 register_activation_hook( __FILE__, 'motoplus_activate' );
 function motoplus_activate() {

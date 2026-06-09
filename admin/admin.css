@@ -106,3 +106,71 @@
 .mp-import-preview { margin-top: 22px; }
 .mp-import-preview .mp-import-success-box { background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 18px 20px; font-size: 14px; color: #065f46; }
 .mp-import-preview .mp-import-success-box a { color: #065f46; font-weight: 700; }
+
+/* ═══════════════════════════════════════
+   ANALYTICS PAGE
+   ═══════════════════════════════════════ */
+.mp-analytics-wrap { max-width: 1300px; }
+.mp-analytics-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.mp-analytics-header h1 { margin: 0; }
+.mp-period-tabs { display: flex; gap: 4px; }
+.mp-period-tab { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; transition: all .15s; }
+.mp-period-tab:hover { background: #e8f1fc; color: #1565c0; border-color: #bfdbfe; }
+.mp-period-tab.active { background: #1565c0; color: #fff; border-color: #1565c0; }
+
+/* Stat cards */
+.mp-analytics-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
+@media(max-width:1100px){ .mp-analytics-stats { grid-template-columns: repeat(3,1fr); } }
+@media(max-width:700px) { .mp-analytics-stats { grid-template-columns: repeat(2,1fr); } }
+.mp-analytics-stat { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.mp-analytics-stat--accent { background: linear-gradient(135deg,#1565c0,#1e88e5); border-color: transparent; }
+.mp-analytics-stat__icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.mp-analytics-stat__num { font-size: 26px; font-weight: 900; color: #0d1b2a; line-height: 1; margin-bottom: 2px; }
+.mp-analytics-stat__label { font-size: 12px; font-weight: 700; color: #374151; }
+.mp-analytics-stat__sub { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+/* Cards */
+.mp-analytics-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0; overflow: hidden; }
+.mp-analytics-card__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; }
+.mp-analytics-card__header h3 { font-size: 14px; font-weight: 700; margin: 0; color: #0d1b2a; }
+.mp-analytics-card__sub { font-size: 12px; color: #94a3b8; }
+.mp-analytics-chart-card { margin-bottom: 20px; }
+.mp-chart-wrap { padding: 16px 20px 8px; }
+.mp-chart-wrap canvas { width: 100%; display: block; }
+
+/* Grid */
+.mp-analytics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width:1100px){ .mp-analytics-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:700px) { .mp-analytics-grid { grid-template-columns: 1fr; } }
+.mp-analytics-card--full { grid-column: 1 / -1; }
+
+/* Table */
+.mp-analytics-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mp-analytics-table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 600; padding: 10px 14px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+.mp-analytics-table tbody tr { border-bottom: 1px solid #f8fafc; transition: background .1s; }
+.mp-analytics-table tbody tr:hover { background: #f8faff; }
+.mp-analytics-table tbody tr:last-child { border-bottom: none; }
+.mp-analytics-table td { padding: 10px 14px; vertical-align: middle; }
+.mp-rank { font-size: 12px; font-weight: 700; color: #94a3b8; width: 28px; }
+.mp-vehicle-link { font-weight: 600; color: #1565c0; text-decoration: none; display: block; font-size: 13px; }
+.mp-vehicle-link:hover { text-decoration: underline; }
+.mp-vehicle-price { font-size: 12px; color: #94a3b8; display: block; margin-top: 1px; }
+.mp-view-link { color: #94a3b8; font-size: 14px; text-decoration: none; }
+.mp-view-link:hover { color: #1565c0; }
+.mp-mini-bar-wrap { width: 80px; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.mp-mini-bar { height: 100%; background: #1565c0; border-radius: 3px; transition: width .3s ease; }
+.mp-mini-bar--green { background: #16a34a; }
+.mp-mini-bar--whatsapp { background: #25d366; }
+.mp-analytics-empty { padding: 32px 20px; text-align: center; color: #94a3b8; font-size: 13px; font-style: italic; }
+
+/* Full table */
+.mp-analytics-table--full .mp-vehicle-link { font-size: 13px; }
+.mp-status-dot { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.mp-status-dot--in-stock    { background: #dbeafe; color: #1565c0; }
+.mp-status-dot--reserved    { background: #fef3c7; color: #92400e; }
+.mp-status-dot--sold        { background: #f1f5f9; color: #374151; }
+.mp-status-dot--coming-soon { background: #ede9fe; color: #5b21b6; }
+.mp-cr-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.mp-cr-badge--good { background: #dcfce7; color: #166534; }
+.mp-cr-badge--ok   { background: #fef9c3; color: #854d0e; }
+.mp-cr-badge--low  { background: #f1f5f9; color: #64748b; }

@@ -383,3 +383,21 @@
 .mp-coming-soon-img { width:100%; height:100%; object-fit:cover; display:block; }
 .mp-card-img .mp-coming-soon-img { position:absolute; inset:0; }
 
+
+/* ── WhatsApp CTA button ── */
+.mp-cta-whatsapp {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; padding: 15px 20px;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+  background: #25d366; color: #fff;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  transition: filter .15s;
+}
+.mp-cta-whatsapp:hover { filter: brightness(1.08); color: #fff; }
+
+/* ── Mobile sticky: 3-button variant ── */
+.mp-mobile-sticky__whatsapp {
+  display: flex; flex: 1; align-items: center; justify-content: center;
+  gap: 6px; padding: 16px 10px; font-size: 14px; font-weight: 700;
+  text-decoration: none; background: #25d366; color: #fff;
+}

@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 function motoplus_dashboard_page() {
     $live     = (int)(wp_count_posts(MOTOPLUS_CPT)->publish     ?? 0);
+    $views_30  = function_exists('motoplus_get_period_views')     ? motoplus_get_period_views(30)     : 0;
+    $enq_30    = function_exists('motoplus_get_period_enquiries') ? motoplus_get_period_enquiries(30) : 0;
     $leads    = (int)(wp_count_posts(MOTOPLUS_LEAD_CPT)->publish ?? 0);
     $featured = motoplus_count_meta('featured','1');
     $reserved = motoplus_count_meta('status','Reserved');
@@ -22,6 +24,8 @@ function motoplus_dashboard_page() {
             <div class="mp-stat"><span><?php echo $reserved; ?></span><label>Reserved</label></div>
             <div class="mp-stat"><span><?php echo $sold; ?></span><label>Sold</label></div>
             <div class="mp-stat mp-stat--accent"><span><?php echo $leads; ?></span><label>Enquiries</label></div>
+            <div class="mp-stat"><span><?php echo number_format($views_30); ?></span><label>Views (30d)</label></div>
+            <div class="mp-stat"><span><?php echo number_format($enq_30); ?></span><label>Enquiries (30d)</label></div>
         </div>
 
         <div class="mp-dash-grid">
@@ -32,6 +36,7 @@ function motoplus_dashboard_page() {
                     <a class="mp-btn mp-btn--ghost" href="<?php echo esc_url(admin_url('admin.php?page=motoplus-import')); ?>">⬇ Import Vehicle</a>
                     <a class="mp-btn mp-btn--ghost" href="<?php echo esc_url(admin_url('edit.php?post_type='.MOTOPLUS_CPT)); ?>">All Vehicles</a>
                     <a class="mp-btn mp-btn--ghost" href="<?php echo esc_url(admin_url('edit.php?post_type='.MOTOPLUS_LEAD_CPT)); ?>">All Enquiries</a>
+                    <a class="mp-btn mp-btn--ghost" href="<?php echo esc_url(admin_url('edit.php?post_type='.MOTOPLUS_CPT.'&page=motoplus-analytics')); ?>">📊 Analytics</a>
                 </div>
             </div>
 
