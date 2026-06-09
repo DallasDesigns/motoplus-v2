@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e63946;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#e63946;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#e63946;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e63946;stop-opacity:0"/>
+      <stop offset="30%" style="stop-color:#e63946;stop-opacity:1"/>
+      <stop offset="70%" style="stop-color:#e63946;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e63946;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bg)"/>
+
+  <!-- Subtle radial glow -->
+  <ellipse cx="400" cy="250" rx="380" ry="240" fill="url(#accent)"/>
+
+  <!-- Decorative corner marks -->
+  <path d="M 40 40 L 40 80 M 40 40 L 80 40" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+  <path d="M 760 40 L 760 80 M 760 40 L 720 40" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+  <path d="M 40 460 L 40 420 M 40 460 L 80 460" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+  <path d="M 760 460 L 760 420 M 760 460 L 720 460" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+
+  <!-- Camera icon -->
+  <g transform="translate(370, 148)">
+    <rect x="-30" y="-18" width="60" height="44" rx="6" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+    <rect x="-8" y="-24" width="16" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+    <circle cx="0" cy="10" r="12" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+    <circle cx="0" cy="10" r="6" fill="rgba(255,255,255,0.1)"/>
+  </g>
+
+  <!-- Accent line -->
+  <rect x="100" y="215" width="600" height="1" fill="url(#line)"/>
+
+  <!-- Main text -->
+  <text x="400" y="270" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="32" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0">Photos Coming Soon</text>
+
+  <!-- Subtext -->
+  <text x="400" y="308" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="15" font-weight="400" fill="rgba(255,255,255,0.45)" text-anchor="middle" letter-spacing="1">Contact us for more information</text>
+
+  <!-- Bottom accent line -->
+  <rect x="100" y="334" width="600" height="1" fill="url(#line)"/>
+
+  <!-- Dots decoration -->
+  <circle cx="366" cy="360" r="2" fill="rgba(230,57,70,0.6)"/>
+  <circle cx="382" cy="360" r="2" fill="rgba(230,57,70,0.8)"/>
+  <circle cx="400" cy="360" r="3" fill="#e63946"/>
+  <circle cx="418" cy="360" r="2" fill="rgba(230,57,70,0.8)"/>
+  <circle cx="434" cy="360" r="2" fill="rgba(230,57,70,0.6)"/>
+</svg>

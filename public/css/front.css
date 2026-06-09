@@ -378,3 +378,8 @@
   .mp-search-field { min-width: 100%; }
   .mp-results-bar  { flex-direction: column; align-items: flex-start; }
 }
+
+/* Coming soon placeholder */
+.mp-coming-soon-img { width:100%; height:100%; object-fit:cover; display:block; }
+.mp-card-img .mp-coming-soon-img { position:absolute; inset:0; }
+

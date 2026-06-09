@@ -87,7 +87,9 @@ function motoplus_vehicle_image( $id, $size = 'large' ) {
     $gallery = motoplus_meta( $id, 'gallery' );
     $first   = absint( explode( ',', $gallery )[0] ?? 0 );
     if ( $first ) return wp_get_attachment_image( $first, $size );
-    return '<div class="mp-no-image"><span>🚗</span></div>';
+    $placeholder = MOTOPLUS_URL . 'public/img/coming-soon.svg';
+    $title       = get_the_title( $id ) ?: 'Vehicle';
+    return '<img src="' . esc_url( $placeholder ) . '" alt="' . esc_attr( $title ) . ' — Photos Coming Soon" class="mp-coming-soon-img" />';
 }
 
 function motoplus_get_unique_meta( $key ) {
