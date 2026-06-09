@@ -139,7 +139,9 @@ function motoplus_save_vehicle( $post_id ) {
         if ( $field['type'] === 'checkbox' ) {
             $value = isset($data[$key]) ? '1' : '0';
         } elseif ( $field['type'] === 'number' ) {
-            $value = isset($data[$key]) && $data[$key] !== '' ? (string) floatval($data[$key]) : '';
+            // Store as plain integer string — floatval can produce scientific notation for large values
+            $raw   = preg_replace( '/[^0-9]/', '', $data[$key] ?? '' );
+            $value = $raw !== '' ? (string) (int) $raw : '';
         } elseif ( $key === 'gallery' ) {
             $value = sanitize_text_field( $data[$key] ?? '' );
         } else {

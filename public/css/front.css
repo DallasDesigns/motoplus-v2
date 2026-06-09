@@ -146,10 +146,14 @@
 
 /* Spec table */
 .mp-spec-section { background: var(--mp-card-bg); border: 1px solid var(--mp-border); border-radius: var(--mp-card-radius); padding: 24px; margin-bottom: 28px; }
-.mp-spec-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0; }
-.mp-spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--mp-border); font-size: 14px; }
-.mp-spec-row span { color: var(--mp-muted); }
-.mp-spec-row strong { font-weight: 600; text-align: right; }
+.mp-spec-table { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.mp-spec-row { display: contents; }
+.mp-spec-row span,
+.mp-spec-row strong { padding: 10px 12px; border-bottom: 1px solid var(--mp-border); font-size: 14px; line-height: 1.4; }
+.mp-spec-row span   { color: var(--mp-muted); }
+.mp-spec-row strong { font-weight: 600; text-align: left; }
+.mp-spec-table .mp-spec-row:last-child span,
+.mp-spec-table .mp-spec-row:last-child strong { border-bottom: none; }
 
 /* Description */
 .mp-description { background: var(--mp-card-bg); border: 1px solid var(--mp-border); border-radius: var(--mp-card-radius); padding: 24px; margin-bottom: 28px; }

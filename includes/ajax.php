@@ -222,9 +222,18 @@ function motoplus_process_import($html, $source_url) {
 
     if (is_wp_error($post_id)) wp_send_json_error(['message'=>$post_id->get_error_message()]);
 
-    $allowed = array_keys(motoplus_vehicle_fields());
+    $allowed      = array_keys(motoplus_vehicle_fields());
+    $num_fields   = ['price','mileage','year','doors','owners','seats'];
     foreach (($data['fields']??[]) as $key=>$value) {
-        if (in_array($key,$allowed)) update_post_meta($post_id, MOTOPLUS_META.$key, sanitize_text_field($value));
+        if (!in_array($key,$allowed)) continue;
+        if (in_array($key,$num_fields)) {
+            // Strip all non-numeric characters, store as plain integer string
+            $clean = preg_replace('/[^0-9]/','',(string)$value);
+            $value = $clean !== '' ? (string)(int)$clean : '';
+        } else {
+            $value = sanitize_text_field($value);
+        }
+        if ($value !== '') update_post_meta($post_id, MOTOPLUS_META.$key, $value);
     }
     update_post_meta($post_id, MOTOPLUS_META.'status', 'In Stock');
     if ($source_url) update_post_meta($post_id, MOTOPLUS_META.'import_source', esc_url_raw($source_url));

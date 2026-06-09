@@ -29,7 +29,12 @@ function motoplus_meta( $post_id, $key ) {
 
 function motoplus_money( $value ) {
     if ( $value === '' || $value === null ) return '';
-    return '£' . number_format( (float) $value, 0 );
+    // Strip anything non-numeric except decimal point, then cast to int
+    $clean = preg_replace( '/[^0-9.]/', '', (string) $value );
+    if ( $clean === '' ) return '';
+    $int = (int) round( (float) $clean );
+    if ( $int <= 0 || $int > 10000000 ) return ''; // sanity cap — no car costs >£10m
+    return '£' . number_format( $int, 0 );
 }
 
 function motoplus_miles( $value ) {
