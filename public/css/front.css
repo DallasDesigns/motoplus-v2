@@ -401,3 +401,17 @@
   gap: 6px; padding: 16px 10px; font-size: 14px; font-weight: 700;
   text-decoration: none; background: #25d366; color: #fff;
 }
+
+/* Cards per row from settings */
+#mp-stock-wrap .mp-grid {
+  grid-template-columns: repeat(var(--mp-grid-cols, 3), 1fr);
+}
+#mp-stock-wrap .mp-grid.mp-list-view {
+  grid-template-columns: 1fr !important;
+}
+@media(max-width:768px){
+  #mp-stock-wrap .mp-grid { grid-template-columns: repeat(2,1fr) !important; }
+}
+@media(max-width:480px){
+  #mp-stock-wrap .mp-grid { grid-template-columns: 1fr !important; }
+}

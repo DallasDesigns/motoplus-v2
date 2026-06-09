@@ -57,7 +57,10 @@ function motoplus_render_stock( $opts ) {
     $q = new WP_Query($args);
 
     ob_start();
-    echo '<div class="mp-wrap" id="mp-stock-wrap" data-limit="'.esc_attr($limit).'" data-featured="'.($featured_only?'1':'0').'">';
+    $ls = motoplus_settings();
+    $per_row = absint($ls['listing_cards_per_row'] ?? 3);
+    $def_view = $ls['listing_default_view'] ?? 'grid';
+    echo '<div class="mp-wrap" id="mp-stock-wrap" data-limit="'.esc_attr($limit).'" data-featured="'.($featured_only?'1':'0').'" data-default-view="'.esc_attr($def_view).'" style="--mp-grid-cols:'.esc_attr($per_row).'">';
 
     if ($show_search) motoplus_render_filter_bar();
 
@@ -65,8 +68,14 @@ function motoplus_render_stock( $opts ) {
         echo '<div class="mp-results-bar">';
         echo '<span class="mp-count" id="mp-count">'.intval($q->found_posts).' vehicle'.($q->found_posts!==1?'s':'').' found</span>';
         echo '<div class="mp-sort-toggle">';
-        echo '<select id="mp-sort"><option value="">Newest First</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="mileage-asc">Lowest Mileage</option><option value="year-desc">Newest Year</option></select>';
-        echo '<div class="mp-view-toggle"><button class="mp-view-btn active" data-view="grid" title="Grid">⊞</button><button class="mp-view-btn" data-view="list" title="List">☰</button></div>';
+        if (($ls['listing_show_sort'] ?? '1') !== '0') {
+            echo '<select id="mp-sort"><option value="">Newest First</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="mileage-asc">Lowest Mileage</option><option value="year-desc">Newest Year</option></select>';
+        }
+        if (($ls['listing_show_view_toggle'] ?? '1') !== '0') {
+            $active_grid = $def_view==='grid' ? 'active' : '';
+            $active_list = $def_view==='list' ? 'active' : '';
+            echo '<div class="mp-view-toggle"><button class="mp-view-btn '.$active_grid.'" data-view="grid" title="Grid">⊞</button><button class="mp-view-btn '.$active_list.'" data-view="list" title="List">☰</button></div>';
+        }
         echo '</div></div>';
     }
 
@@ -155,6 +164,7 @@ function motoplus_vehicle_card( $id ) {
     $featured = motoplus_meta($id,'featured');
     $reduced  = ($prev && $price && $prev > $price);
     ?>
+    <?php $ls_s = motoplus_settings(); ?>
     <article class="mp-card" data-id="<?php echo esc_attr($id); ?>">
         <a class="mp-card-img" href="<?php echo esc_url($url); ?>">
             <?php echo motoplus_vehicle_image($id,'large'); ?>
@@ -177,14 +187,14 @@ function motoplus_vehicle_card( $id ) {
                 <?php echo esc_html(motoplus_money($price)); ?>
             </div>
             <ul class="mp-card-specs">
-                <?php if($year)    : ?><li><?php echo esc_html(motoplus_spec_icon('year'));    ?> <?php echo esc_html($year); ?></li><?php endif; ?>
-                <?php if($mileage) : ?><li><?php echo esc_html(motoplus_spec_icon('mileage')); ?> <?php echo esc_html(motoplus_miles($mileage)); ?></li><?php endif; ?>
-                <?php if($fuel)    : ?><li><?php echo esc_html(motoplus_spec_icon('fuel'));    ?> <?php echo esc_html($fuel); ?></li><?php endif; ?>
-                <?php if($gearbox) : ?><li><?php echo esc_html(motoplus_spec_icon('gearbox')); ?> <?php echo esc_html($gearbox); ?></li><?php endif; ?>
+                <?php if($year    && ($ls_s['listing_show_year']    ?? '1') !== '0') : ?><li><?php echo esc_html(motoplus_spec_icon('year'));    ?> <?php echo esc_html($year); ?></li><?php endif; ?>
+                <?php if($mileage && ($ls_s['listing_show_mileage'] ?? '1') !== '0') : ?><li><?php echo esc_html(motoplus_spec_icon('mileage')); ?> <?php echo esc_html(motoplus_miles($mileage)); ?></li><?php endif; ?>
+                <?php if($fuel    && ($ls_s['listing_show_fuel']    ?? '1') !== '0') : ?><li><?php echo esc_html(motoplus_spec_icon('fuel'));    ?> <?php echo esc_html($fuel); ?></li><?php endif; ?>
+                <?php if($gearbox && ($ls_s['listing_show_gearbox'] ?? '1') !== '0') : ?><li><?php echo esc_html(motoplus_spec_icon('gearbox')); ?> <?php echo esc_html($gearbox); ?></li><?php endif; ?>
             </ul>
             <div class="mp-card-actions">
-                <a class="mp-btn mp-btn--primary" href="<?php echo esc_url($url); ?>">View Vehicle</a>
-                <a class="mp-btn mp-btn--ghost"   href="<?php echo esc_url($url); ?>#mp-enquire">Enquire</a>
+                <a class="mp-btn mp-btn--primary" href="<?php echo esc_url($url); ?>"><?php echo esc_html($ls_s['listing_btn_primary_text'] ?: 'View Vehicle'); ?></a>
+                <a class="mp-btn mp-btn--ghost"   href="<?php echo esc_url($url); ?>#mp-enquire"><?php echo esc_html($ls_s['listing_btn_enquire_text'] ?: 'Enquire'); ?></a>
             </div>
         </div>
     </article>
