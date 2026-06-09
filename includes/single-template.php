@@ -8,165 +8,263 @@ function motoplus_single_content( $content ) {
     $id       = get_the_ID();
     $settings = motoplus_settings();
     $phone    = trim($settings['dealer_phone']);
-    $tel      = preg_replace('/[^0-9+]/','', $phone);
+    $tel      = preg_replace('/[^0-9+]/', '', $phone);
+    $dealer   = $settings['dealer_name'] ?: get_bloginfo('name');
 
     $status   = motoplus_meta($id,'status') ?: 'In Stock';
     $price    = motoplus_meta($id,'price');
     $prev     = motoplus_meta($id,'previous_price');
-    $reduced  = ($prev && $price && $prev > $price);
+    $reduced  = ($prev && $price && (int)$prev > (int)$price);
     $is_new   = motoplus_is_new_arrival($id);
 
+    // Gallery
     $gallery_raw = motoplus_meta($id,'gallery');
     $gallery_ids = array_filter(array_map('absint', explode(',', $gallery_raw ?: '')));
     if (!$gallery_ids && has_post_thumbnail($id)) $gallery_ids = [get_post_thumbnail_id($id)];
+    $gallery_ids = array_values($gallery_ids);
+
+    // All spec fields grouped for the table
+    $spec_groups = [
+        'Overview'           => ['make','model','variant','year','registration'],
+        'Performance'        => ['engine','fuel','gearbox','body'],
+        'Details'            => ['colour','doors','seats','mileage'],
+        'History & Condition'=> ['owners','service_history','mot_expiry','road_tax','tax_band','co2'],
+        'Other'              => ['location','payload'],
+    ];
+
+    // Highlights
+    $highlights = [];
+    if ($is_new) $highlights[]  = ['icon'=>'🆕','text'=>'New Arrival'];
+    if ($reduced) $highlights[] = ['icon'=>'💰','text'=>'Price Reduced'];
+    if (stripos(motoplus_meta($id,'service_history'),'Full')!==false) $highlights[]=['icon'=>'📋','text'=>'Full Service History'];
+    if ((int)motoplus_meta($id,'owners')===1) $highlights[]=['icon'=>'👤','text'=>'1 Previous Owner'];
+    $mil = (int)motoplus_meta($id,'mileage');
+    if ($mil>0 && $mil<40000) $highlights[]=['icon'=>'⬇️','text'=>'Low Mileage'];
 
     ob_start();
     ?>
     <div class="mp-single">
 
-        <!-- Header -->
-        <div class="mp-single-header">
-            <div class="mp-single-header-text">
-                <div class="mp-single-status mp-status--<?php echo sanitize_html_class(strtolower($status)); ?>"><?php echo esc_html($status); ?></div>
-                <h1 class="mp-single-title"><?php the_title(); ?></h1>
+        <!-- Breadcrumb -->
+        <nav class="mp-breadcrumb">
+            <a href="<?php echo esc_url(get_post_type_archive_link(MOTOPLUS_CPT)); ?>">← Back to Stock</a>
+        </nav>
+
+        <!-- Vehicle title bar -->
+        <div class="mp-single-titlebar">
+            <div class="mp-single-titlebar__left">
+                <h1 class="mp-single-h1"><?php the_title(); ?></h1>
+                <div class="mp-single-meta">
+                    <?php $reg = motoplus_meta($id,'registration'); if($reg): ?>
+                    <span class="mp-reg-plate"><?php echo esc_html(strtoupper($reg)); ?></span>
+                    <?php endif; ?>
+                    <span class="mp-status-pill mp-status-pill--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
+                </div>
             </div>
-            <div class="mp-single-price-wrap">
-                <?php if ($reduced): ?><div class="mp-single-prev-price"><?php echo esc_html(motoplus_money($prev)); ?></div><?php endif; ?>
-                <div class="mp-single-price"><?php echo esc_html(motoplus_money($price)); ?></div>
+            <div class="mp-single-titlebar__price">
+                <?php if ($reduced): ?>
+                <div class="mp-was-price">Was <?php echo esc_html(motoplus_money($prev)); ?></div>
+                <?php endif; ?>
+                <div class="mp-sale-price"><?php echo esc_html(motoplus_money($price)); ?></div>
+                <?php if ($reduced): ?>
+                <div class="mp-saving">Save <?php echo esc_html(motoplus_money((int)$prev-(int)$price)); ?></div>
+                <?php endif; ?>
             </div>
         </div>
 
-        <!-- Main layout -->
-        <div class="mp-single-layout">
+        <!-- Main two-column layout -->
+        <div class="mp-single-body">
 
-            <!-- Gallery -->
-            <div class="mp-single-gallery">
-                <div class="mp-gallery-main" id="mp-gallery-main">
-                    <?php if ($gallery_ids) : ?>
-                    <img id="mp-main-img" src="<?php echo esc_url(wp_get_attachment_image_url($gallery_ids[0],'large')); ?>" alt="<?php the_title_attribute(); ?>" />
-                    <?php if ($status !== 'In Stock') : ?>
-                        <span class="mp-badge mp-badge--<?php echo sanitize_html_class(strtolower($status)); ?> mp-badge--overlay"><?php echo esc_html($status); ?></span>
-                    <?php elseif ($reduced) : ?>
-                        <span class="mp-badge mp-badge--reduced mp-badge--overlay">Price Drop</span>
-                    <?php elseif ($is_new) : ?>
-                        <span class="mp-badge mp-badge--new mp-badge--overlay">New In</span>
-                    <?php endif; ?>
-                    <?php else : ?>
-                    <?php echo motoplus_vehicle_image($id,'large'); ?>
+            <!-- LEFT: Gallery -->
+            <div class="mp-single-left">
+                <div class="mp-gallery-wrap">
+                    <div class="mp-gallery-stage">
+                        <?php if ($gallery_ids) : ?>
+                        <img id="mp-main-img"
+                             src="<?php echo esc_url(wp_get_attachment_image_url($gallery_ids[0],'large')); ?>"
+                             alt="<?php the_title_attribute(); ?>" />
+                        <?php if ($status !== 'In Stock') : ?>
+                        <span class="mp-img-badge mp-img-badge--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
+                        <?php elseif ($reduced) : ?>
+                        <span class="mp-img-badge mp-img-badge--reduced">Price Drop</span>
+                        <?php elseif ($is_new) : ?>
+                        <span class="mp-img-badge mp-img-badge--new">New In</span>
+                        <?php endif; ?>
+                        <?php if (count($gallery_ids) > 1): ?>
+                        <div class="mp-img-counter"><span id="mp-img-num">1</span> / <?php echo count($gallery_ids); ?></div>
+                        <?php endif; ?>
+                        <?php else : ?>
+                        <?php echo motoplus_vehicle_image($id,'large'); ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if (count($gallery_ids) > 1) : ?>
+                    <div class="mp-thumb-strip">
+                        <?php foreach ($gallery_ids as $i => $img_id) : ?>
+                        <button class="mp-thumb-btn <?php echo $i===0?'is-active':''; ?>"
+                                data-full="<?php echo esc_url(wp_get_attachment_image_url($img_id,'large')); ?>"
+                                data-index="<?php echo $i+1; ?>"
+                                type="button">
+                            <img src="<?php echo esc_url(wp_get_attachment_image_url($img_id,'thumbnail')); ?>" alt="Photo <?php echo $i+1; ?>" />
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
                 </div>
-                <?php if (count($gallery_ids) > 1) : ?>
-                <div class="mp-gallery-thumbs">
-                    <?php foreach ($gallery_ids as $i => $img_id) : ?>
-                    <img class="mp-thumb <?php echo $i===0?'active':''; ?>"
-                         src="<?php echo esc_url(wp_get_attachment_image_url($img_id,'thumbnail')); ?>"
-                         data-full="<?php echo esc_url(wp_get_attachment_image_url($img_id,'large')); ?>"
-                         alt="Photo <?php echo $i+1; ?>" />
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-            </div>
 
-            <!-- Sidebar -->
-            <aside class="mp-single-sidebar">
-                <!-- Key specs grid -->
-                <div class="mp-key-specs">
+                <!-- Key specs strip under gallery -->
+                <div class="mp-keyspec-strip">
                     <?php
-                    $key_specs = ['year'=>'Year','mileage'=>'Mileage','fuel'=>'Fuel','gearbox'=>'Transmission','engine'=>'Engine','body'=>'Body','colour'=>'Colour','doors'=>'Doors'];
-                    foreach ($key_specs as $key => $label) :
-                        $val = $key==='mileage' ? motoplus_miles(motoplus_meta($id,$key)) : motoplus_meta($id,$key);
-                        if (!$val) continue;
+                    $strip = ['year'=>'Year','mileage'=>'Mileage','fuel'=>'Fuel','gearbox'=>'Gearbox','engine'=>'Engine','colour'=>'Colour','doors'=>'Doors','body'=>'Body'];
+                    foreach ($strip as $k => $label) :
+                        $v = $k==='mileage' ? motoplus_miles(motoplus_meta($id,$k)) : motoplus_meta($id,$k);
+                        if (!$v) continue;
                     ?>
-                    <div class="mp-key-spec">
-                        <span class="mp-spec-icon"><?php echo esc_html(motoplus_spec_icon($key)); ?></span>
-                        <strong><?php echo esc_html($val); ?></strong>
-                        <span><?php echo esc_html($label); ?></span>
+                    <div class="mp-keyspec-item">
+                        <span class="mp-keyspec-icon"><?php echo esc_html(motoplus_spec_icon($k)); ?></span>
+                        <span class="mp-keyspec-val"><?php echo esc_html($v); ?></span>
+                        <span class="mp-keyspec-label"><?php echo esc_html($label); ?></span>
                     </div>
                     <?php endforeach; ?>
                 </div>
 
-                <!-- CTA buttons -->
-                <div class="mp-single-cta">
+                <!-- Description -->
+                <?php if (trim($content)) : ?>
+                <div class="mp-description-block">
+                    <h2>About This Vehicle</h2>
+                    <div class="mp-description-body"><?php echo $content; ?></div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Full spec table -->
+                <div class="mp-fullspec-block">
+                    <h2>Full Specification</h2>
+                    <?php foreach ($spec_groups as $group_name => $keys) :
+                        $rows = [];
+                        foreach ($keys as $k) {
+                            $field = motoplus_vehicle_fields()[$k] ?? null;
+                            if (!$field) continue;
+                            $v = $k==='mileage' ? motoplus_miles(motoplus_meta($id,$k)) : motoplus_meta($id,$k);
+                            if ($v) $rows[] = ['label'=>$field['label'],'val'=>$v];
+                        }
+                        if (!$rows) continue;
+                    ?>
+                    <div class="mp-spec-group">
+                        <h3><?php echo esc_html($group_name); ?></h3>
+                        <table class="mp-spec-tbl">
+                            <?php foreach ($rows as $row) : ?>
+                            <tr>
+                                <td><?php echo esc_html($row['label']); ?></td>
+                                <td><?php echo esc_html($row['val']); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+            </div><!-- /.mp-single-left -->
+
+            <!-- RIGHT: Sidebar -->
+            <aside class="mp-single-right">
+
+                <!-- Price card -->
+                <div class="mp-price-card">
+                    <div class="mp-price-card__price">
+                        <?php if ($reduced): ?>
+                        <span class="mp-price-was"><?php echo esc_html(motoplus_money($prev)); ?></span>
+                        <?php endif; ?>
+                        <span class="mp-price-main"><?php echo esc_html(motoplus_money($price)); ?></span>
+                    </div>
+
                     <?php if ($tel) : ?>
-                    <a class="mp-btn mp-btn--ghost mp-btn--wide" href="tel:<?php echo esc_attr($tel); ?>">
-                        ☎ <?php echo $phone ? esc_html($phone) : 'Call Us'; ?>
+                    <a class="mp-cta-call" href="tel:<?php echo esc_attr($tel); ?>">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+                        <?php echo esc_html($phone ?: 'Call Us'); ?>
                     </a>
                     <?php endif; ?>
-                    <a class="mp-btn mp-btn--primary mp-btn--wide" href="#mp-enquire">✉ Enquire Now</a>
+
+                    <a class="mp-cta-enquire" href="#mp-enquire">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Enquire About This Vehicle
+                    </a>
                 </div>
 
                 <!-- Highlights -->
-                <?php
-                $highlights = [];
-                if ($is_new) $highlights[] = 'New arrival';
-                if ($reduced) $highlights[] = 'Recently reduced';
-                if (stripos(motoplus_meta($id,'service_history'),'Full')!==false) $highlights[]='Full service history';
-                if ((int)motoplus_meta($id,'owners')===1) $highlights[]='1 previous owner';
-                $m = (int)motoplus_meta($id,'mileage');
-                if ($m>0 && $m<40000) $highlights[]='Low mileage';
-                if ($highlights) :
-                ?>
-                <div class="mp-highlights">
-                    <?php foreach ($highlights as $h) : ?>
-                    <span class="mp-highlight">✓ <?php echo esc_html($h); ?></span>
-                    <?php endforeach; ?>
+                <?php if ($highlights) : ?>
+                <div class="mp-highlights-card">
+                    <h3>Vehicle Highlights</h3>
+                    <ul>
+                        <?php foreach ($highlights as $h) : ?>
+                        <li><span><?php echo esc_html($h['icon']); ?></span><?php echo esc_html($h['text']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
                 <?php endif; ?>
-            </aside>
-        </div>
 
-        <!-- Full spec table -->
-        <section class="mp-spec-section">
-            <h2>Full Specification</h2>
-            <div class="mp-spec-table">
-                <?php foreach (motoplus_vehicle_fields() as $key => $field) :
-                    if (in_array($key,['gallery','featured','previous_price'])) continue;
-                    $val = $key==='mileage' ? motoplus_miles(motoplus_meta($id,$key)) : motoplus_meta($id,$key);
-                    if (!$val) continue;
-                ?>
-                <div class="mp-spec-row">
-                    <span><?php echo esc_html($field['label']); ?></span>
-                    <strong><?php echo esc_html($val); ?></strong>
+                <!-- Quick spec summary -->
+                <div class="mp-quickspec-card">
+                    <h3>Key Details</h3>
+                    <?php
+                    $qs = ['make'=>'Make','model'=>'Model','year'=>'Year','mileage'=>'Mileage','fuel'=>'Fuel Type','gearbox'=>'Transmission','mot_expiry'=>'MOT Expiry','service_history'=>'Service History','owners'=>'Owners'];
+                    foreach ($qs as $k => $label) :
+                        $v = $k==='mileage' ? motoplus_miles(motoplus_meta($id,$k)) : motoplus_meta($id,$k);
+                        if (!$v) continue;
+                    ?>
+                    <div class="mp-qs-row">
+                        <span><?php echo esc_html($label); ?></span>
+                        <strong><?php echo esc_html($v); ?></strong>
+                    </div>
+                    <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
+
+                <!-- Dealer info -->
+                <?php if ($dealer || $phone) : ?>
+                <div class="mp-dealer-card">
+                    <h3>Contact the Dealer</h3>
+                    <?php if ($dealer) : ?><p class="mp-dealer-name"><?php echo esc_html($dealer); ?></p><?php endif; ?>
+                    <?php if ($tel) : ?><a class="mp-dealer-phone" href="tel:<?php echo esc_attr($tel); ?>"><?php echo esc_html($phone); ?></a><?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+            </aside><!-- /.mp-single-right -->
+        </div><!-- /.mp-single-body -->
+
+        <!-- Enquiry form (full width) -->
+        <section id="mp-enquire" class="mp-enquiry-section">
+            <div class="mp-enquiry-inner">
+                <div class="mp-enquiry-header">
+                    <h2>Enquire About This Vehicle</h2>
+                    <p>Complete the form below and we'll get back to you as soon as possible.</p>
+                </div>
+                <form class="mp-lead-form" id="mp-lead-form">
+                    <input type="hidden" name="vehicle_id"    value="<?php echo esc_attr($id); ?>" />
+                    <input type="hidden" name="vehicle_title" value="<?php echo esc_attr(get_the_title($id)); ?>" />
+                    <div class="mp-form-row">
+                        <div class="mp-form-field">
+                            <label for="mp-f-name">Full Name <span>*</span></label>
+                            <input id="mp-f-name" type="text" name="name" required placeholder="John Smith" />
+                        </div>
+                        <div class="mp-form-field">
+                            <label for="mp-f-phone">Phone Number <span>*</span></label>
+                            <input id="mp-f-phone" type="tel" name="phone" required placeholder="07700 900000" />
+                        </div>
+                        <div class="mp-form-field">
+                            <label for="mp-f-email">Email Address</label>
+                            <input id="mp-f-email" type="email" name="email" placeholder="john@example.com" />
+                        </div>
+                    </div>
+                    <div class="mp-form-field">
+                        <label for="mp-f-msg">Message</label>
+                        <textarea id="mp-f-msg" name="message" rows="4" placeholder="Is this vehicle still available?">Is this vehicle still available?</textarea>
+                    </div>
+                    <div class="mp-form-submit">
+                        <button class="mp-submit-btn" type="submit">Send Enquiry</button>
+                        <p class="mp-form-note">We typically respond within a few hours during business hours.</p>
+                    </div>
+                    <div class="mp-lead-result" id="mp-lead-result"></div>
+                </form>
             </div>
-        </section>
-
-        <!-- Description -->
-        <?php if ($content) : ?>
-        <section class="mp-description">
-            <h2>Description</h2>
-            <div class="mp-description-body"><?php echo $content; ?></div>
-        </section>
-        <?php endif; ?>
-
-        <!-- Enquiry form -->
-        <section id="mp-enquire" class="mp-enquiry">
-            <h2>Enquire About This Vehicle</h2>
-            <form class="mp-lead-form" id="mp-lead-form">
-                <input type="hidden" name="vehicle_id"    value="<?php echo esc_attr($id); ?>" />
-                <input type="hidden" name="vehicle_title" value="<?php echo esc_attr(get_the_title($id)); ?>" />
-                <div class="mp-form-grid">
-                    <div class="mp-form-field">
-                        <label>Your Name *</label>
-                        <input type="text" name="name" required placeholder="John Smith" />
-                    </div>
-                    <div class="mp-form-field">
-                        <label>Phone Number *</label>
-                        <input type="tel" name="phone" required placeholder="07700 900000" />
-                    </div>
-                    <div class="mp-form-field">
-                        <label>Email Address</label>
-                        <input type="email" name="email" placeholder="john@example.com" />
-                    </div>
-                </div>
-                <div class="mp-form-field">
-                    <label>Message</label>
-                    <textarea name="message" rows="4" placeholder="Is this vehicle still available?">Is this vehicle still available?</textarea>
-                </div>
-                <button class="mp-btn mp-btn--primary" type="submit">✉ Send Enquiry</button>
-                <div class="mp-lead-result" id="mp-lead-result"></div>
-            </form>
         </section>
 
         <!-- Similar vehicles -->
@@ -176,20 +274,20 @@ function motoplus_single_content( $content ) {
             $similar = new WP_Query(['post_type'=>MOTOPLUS_CPT,'posts_per_page'=>3,'post__not_in'=>[$id],'meta_query'=>[['key'=>MOTOPLUS_META.'status','value'=>'Sold','compare'=>'!='],['key'=>MOTOPLUS_META.'make','value'=>$make_val]]]);
             if ($similar->have_posts()) :
         ?>
-        <section class="mp-similar">
-            <h2>Similar Vehicles</h2>
-            <div class="mp-grid mp-grid--compact">
+        <section class="mp-similar-section">
+            <h2>More <?php echo esc_html($make_val); ?> Vehicles</h2>
+            <div class="mp-grid">
                 <?php while($similar->have_posts()) { $similar->the_post(); motoplus_vehicle_card(get_the_ID()); } wp_reset_postdata(); ?>
             </div>
         </section>
         <?php endif; endif; ?>
 
-    </div>
+    </div><!-- /.mp-single -->
 
     <?php if ($tel) : ?>
     <div class="mp-mobile-sticky">
-        <a href="tel:<?php echo esc_attr($tel); ?>">☎ Call</a>
-        <a href="#mp-enquire">✉ Enquire</a>
+        <a class="mp-mobile-sticky__call"    href="tel:<?php echo esc_attr($tel); ?>">📞 Call Us</a>
+        <a class="mp-mobile-sticky__enquire" href="#mp-enquire">✉ Enquire</a>
     </div>
     <?php endif; ?>
     <?php

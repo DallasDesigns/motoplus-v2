@@ -124,11 +124,13 @@ jQuery(function ($) {
     });
 
     // ── Gallery thumbnails (single vehicle page) ────────────────────────────
-    $(document).on('click', '.mp-thumb', function () {
+    $(document).on('click', '.mp-thumb-btn', function () {
         var $this = $(this);
         var full  = $this.data('full');
+        var idx   = $this.data('index');
         $('#mp-main-img').attr('src', full);
-        $('.mp-thumb').removeClass('active');
-        $this.addClass('active');
+        $('.mp-thumb-btn').removeClass('is-active');
+        $this.addClass('is-active');
+        $('#mp-img-num').text(idx);
     });
 });
