@@ -53,7 +53,7 @@ function motoplus_settings() {
         'product_show_description'    => '1',
         'product_show_breadcrumb'     => '1',
         'product_enquiry_title'       => 'Enquire About This Vehicle',
-        'product_enquiry_subtitle'    => 'Complete the form below and we'll get back to you as soon as possible.',
+        'product_enquiry_subtitle'    => 'Complete the form below and we\'ll get back to you as soon as possible.',
         'product_similar_title'       => 'Similar Vehicles',
         'product_cta_call_text'       => 'Call Us',
         'product_cta_enquire_text'    => 'Enquire Now',
