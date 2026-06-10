@@ -76,7 +76,10 @@
 .mp-card-title a:hover { color: var(--mp-accent); }
 .mp-card-price { font-size: 22px; font-weight: 800; color: var(--mp-accent); margin-bottom: 10px; line-height: 1.1; }
 .mp-prev-price { font-size: 14px; font-weight: 500; color: var(--mp-muted); text-decoration: line-through; margin-right: 6px; }
-.mp-card-specs { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; flex: 1; align-content: flex-start; }
+.mp-card-specs { list-style: none !important; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px 16px; flex: 1; align-content: flex-start; }
+.mp-card-specs li { list-style: none !important; display: flex; align-items: center; gap: 5px; }
+.mp-card-specs li::before { display: none !important; }
+.mp-card-specs li::marker { display: none !important; }
 .mp-card-specs li { font-size: 13px; color: var(--mp-muted); }
 .mp-card-actions { display: flex; gap: 8px; margin-top: auto; }
 .mp-card-actions .mp-btn { flex: 1; font-size: 13px; padding: 9px 12px; }
@@ -414,4 +417,34 @@
 }
 @media(max-width:480px){
   #mp-stock-wrap .mp-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── SVG spec icons ── */
+.mp-card-specs li svg,
+.mp-keyspec-icon svg,
+.mp-single-left svg.spec-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    color: var(--mp-muted);
+}
+.mp-card-specs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--mp-muted);
+}
+.mp-card-specs li span {
+    line-height: 1;
+}
+.mp-keyspec-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mp-muted);
+    line-height: 1;
+}
+.mp-keyspec-icon svg {
+    color: var(--mp-muted);
 }
