@@ -202,4 +202,15 @@
 
 /* Admin thumbnail fix */
 .column-image { width: 70px !important; }
-.column-image img,.column-image .mp-coming-soon-img,.column-image .mp-no-image { width: 60px !important; height: 45px !important; object-fit: cover !important; border-radius: 5px; display: block; border: 1px solid #e5e7eb; }
+.column-image img,
+.column-image .mp-coming-soon-img,
+.column-image .mp-no-image {
+    width: 60px !important;
+    height: 45px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    border-radius: 5px !important;
+    display: block !important;
+    border: 1px solid #e5e7eb !important;
+    background: #f3f4f6 !important;
+}

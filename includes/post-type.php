@@ -35,7 +35,7 @@ add_filter( 'manage_' . MOTOPLUS_CPT . '_posts_columns', function( $cols ) {
     return ['cb'=>$cols['cb'],'image'=>'Photo','title'=>'Vehicle','price'=>'Price','status'=>'Status','featured'=>'★','date'=>$cols['date']];
 });
 add_action( 'manage_' . MOTOPLUS_CPT . '_posts_custom_column', function( $col, $id ) {
-    if ( $col === 'image'    ) { echo '<div style="width:60px;height:45px;overflow:hidden;border-radius:5px;border:1px solid #e5e7eb">'; echo motoplus_vehicle_image( $id, 'thumbnail' ); echo '</div>'; }
+    if ( $col === 'image'    ) { echo '<div style="width:60px;height:45px;background:#f3f4f6;border-radius:5px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;overflow:hidden">'; $img = motoplus_vehicle_image($id,'thumbnail'); $img = str_replace('<img ', '<img style="width:60px;height:45px;object-fit:contain;object-position:center" ', $img); echo $img; echo '</div>'; }
     if ( $col === 'price'    ) echo esc_html( motoplus_money( motoplus_meta($id,'price') ) );
     if ( $col === 'status'   ) { $s = motoplus_meta($id,'status') ?: 'In Stock'; echo '<span class="mp-col-status mp-col-status--'.sanitize_html_class(strtolower($s)).'">'.esc_html($s).'</span>'; }
     if ( $col === 'featured' ) echo motoplus_meta($id,'featured')==='1' ? '<span title="Featured">⭐</span>' : '—';

@@ -186,11 +186,11 @@ function motoplus_vehicle_card( $id ) {
                 <?php endif; ?>
                 <?php echo esc_html(motoplus_money($price)); ?>
             </div>
-            <ul class="mp-card-specs">
-                <?php if($year    && ($ls_s['listing_show_year']    ?? '1') !== '0') : ?><li><?php echo motoplus_spec_icon('year',14);    ?><span><?php echo esc_html($year); ?></span></li><?php endif; ?>
-                <?php if($mileage && ($ls_s['listing_show_mileage'] ?? '1') !== '0') : ?><li><?php echo motoplus_spec_icon('mileage',14); ?><span><?php echo esc_html(motoplus_miles($mileage)); ?></span></li><?php endif; ?>
-                <?php if($fuel    && ($ls_s['listing_show_fuel']    ?? '1') !== '0') : ?><li><?php echo motoplus_spec_icon('fuel',14);    ?><span><?php echo esc_html($fuel); ?></span></li><?php endif; ?>
-                <?php if($gearbox && ($ls_s['listing_show_gearbox'] ?? '1') !== '0') : ?><li><?php echo motoplus_spec_icon('gearbox',14); ?><span><?php echo esc_html($gearbox); ?></span></li><?php endif; ?>
+            <ul class="mp-card-specs" style="list-style:none!important;padding:0!important;margin:0 0 14px!important">
+                <?php if($year    && ($ls_s['listing_show_year']    ?? '1') !== '0') : ?><li style="list-style:none!important;display:inline-flex!important;align-items:center!important;gap:5px!important;padding:0!important;margin:0!important"><?php echo motoplus_spec_icon('year',14);    ?><span><?php echo esc_html($year); ?></span></li><?php endif; ?>
+                <?php if($mileage && ($ls_s['listing_show_mileage'] ?? '1') !== '0') : ?><li style="list-style:none!important;display:inline-flex!important;align-items:center!important;gap:5px!important;padding:0!important;margin:0!important"><?php echo motoplus_spec_icon('mileage',14); ?><span><?php echo esc_html(motoplus_miles($mileage)); ?></span></li><?php endif; ?>
+                <?php if($fuel    && ($ls_s['listing_show_fuel']    ?? '1') !== '0') : ?><li style="list-style:none!important;display:inline-flex!important;align-items:center!important;gap:5px!important;padding:0!important;margin:0!important"><?php echo motoplus_spec_icon('fuel',14);    ?><span><?php echo esc_html($fuel); ?></span></li><?php endif; ?>
+                <?php if($gearbox && ($ls_s['listing_show_gearbox'] ?? '1') !== '0') : ?><li style="list-style:none!important;display:inline-flex!important;align-items:center!important;gap:5px!important;padding:0!important;margin:0!important"><?php echo motoplus_spec_icon('gearbox',14); ?><span><?php echo esc_html($gearbox); ?></span></li><?php endif; ?>
             </ul>
             <div class="mp-card-actions">
                 <a class="mp-btn mp-btn--primary" href="<?php echo esc_url($url); ?>"><?php echo esc_html($ls_s['listing_btn_primary_text'] ?: 'View Vehicle'); ?></a>
