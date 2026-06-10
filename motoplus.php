@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Motoplus
  * Description: Professional dealer vehicle stock system with live filtering, gallery, lead capture, importer, and AI descriptions.
- * Version:     2.0.0
+ * Version:     3.0.0
  * Author:      Motoplus
  * Text Domain: motoplus
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'MOTOPLUS_VERSION',    '2.0.0' );
+define( 'MOTOPLUS_VERSION',    '3.0.0' );
 define( 'MOTOPLUS_DIR',        plugin_dir_path( __FILE__ ) );
 define( 'MOTOPLUS_URL',        plugin_dir_url( __FILE__ ) );
 define( 'MOTOPLUS_CPT',        'motoplus_vehicle' );

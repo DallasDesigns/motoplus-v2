@@ -35,7 +35,7 @@ function motoplus_sanitize_settings($input) {
         'stock_page_url'     => esc_url_raw($input['stock_page_url'] ?? ''),
         // Integrations
         'lookup_provider'    => $s('lookup_provider','manual'),
-        'lookup_api_key'     => $s('lookup_api_key'),
+        'lookup_api_key'     => $s('lookup_api_key','c87e9404-11ce-4432-a9e1-ccd73276cd63'),
         'openai_api_key'     => $s('openai_api_key'),
         'whatsapp_number'    => $s('whatsapp_number'),
         'whatsapp_message'   => sanitize_textarea_field($input['whatsapp_message'] ?? 'Hi, I am interested in the {title}. {url}'),
@@ -132,10 +132,12 @@ function motoplus_settings_page() {
                         <tr>
                             <th>Lookup Provider</th>
                             <td>
-                                <select name="<?php echo $o; ?>[lookup_provider]">
-                                    <option value="manual" <?php selected($s['lookup_provider'],'manual'); ?>>Manual Only</option>
+                                        <select name="<?php echo $o; ?>[lookup_provider]">
+                                    <option value="manual" <?php selected($s['lookup_provider'],'manual'); ?>>Manual Only (no API)</option>
+                                    <option value="ukvd"   <?php selected($s['lookup_provider'],'ukvd');   ?>>UK Vehicle Data (Recommended)</option>
                                     <option value="dvla"   <?php selected($s['lookup_provider'],'dvla');   ?>>DVLA VES API</option>
                                 </select>
+                                <p class="description">UK Vehicle Data returns make, model, colour, fuel, transmission, engine, MOT, CO2 and more in one call.</p>
                             </td>
                         </tr>
                         <tr><th>Lookup API Key</th><td><input class="regular-text" type="password" name="<?php echo $o; ?>[lookup_api_key]" value="<?php echo esc_attr($s['lookup_api_key']); ?>" /></td></tr>

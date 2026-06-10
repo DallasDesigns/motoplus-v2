@@ -71,19 +71,39 @@ jQuery(function ($) {
             $btn.prop('disabled', false).text('Lookup Vehicle');
             if (res.success && res.data.fields) {
                 var fields = res.data.fields;
+                var populated = [];
+
+                // Populate all returned fields
                 Object.keys(fields).forEach(function (key) {
-                    $('#mp_field_' + key).val(fields[key]);
+                    var $el = $('#mp_field_' + key);
+                    if ($el.length && fields[key]) {
+                        $el.val(fields[key]);
+                        populated.push(fields[key]);
+                        // Flash green to show populated
+                        $el.css('border-color','#22c55e').css('background','#f0fdf4');
+                        setTimeout(function(){ $el.css('border-color','').css('background',''); }, 2000);
+                    }
                 });
-                $result.addClass('success').text('✓ Vehicle data populated.');
+
+                var count = Object.keys(fields).length;
+                $result.addClass('success').html(
+                    '✅ <strong>' + count + ' fields populated</strong> from UK Vehicle Data. Review and adjust if needed.'
+                );
             } else {
-                $result.addClass('error').text(res.data.message || 'Lookup failed.');
+                $result.addClass('error').html('⚠️ ' + (res.data && res.data.message ? res.data.message : 'Lookup failed. Enter details manually.'));
             }
+        }).fail(function(){
+            $btn.prop('disabled', false).text('Lookup Vehicle');
+            $result.addClass('error').text('Connection error. Please try again.');
         });
     });
 
     // Allow Enter key on reg field
     $('#mp_reg_lookup').on('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); $('#mp_lookup_btn').trigger('click'); }
+    });
+    $('#mp_reg_lookup').on('input', function(){
+        this.value = this.value.toUpperCase();
     });
 
     // ── AI description generator ────────────────────────────────────────────

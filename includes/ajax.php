@@ -140,40 +140,275 @@ function motoplus_ajax_generate_description() {
     wp_send_json_success(['description'=>$desc]);
 }
 
-// ── Admin: Registration lookup ────────────────────────────────────────────────
+// ── Admin: Registration lookup via UK Vehicle Data ───────────────────────────
 add_action( 'wp_ajax_motoplus_lookup_vehicle', 'motoplus_ajax_lookup_vehicle' );
 function motoplus_ajax_lookup_vehicle() {
     check_ajax_referer( 'motoplus_admin_nonce', 'nonce' );
     if ( ! current_user_can('edit_posts') ) wp_send_json_error(['message'=>'Permission denied.']);
 
     $s   = motoplus_settings();
-    $reg = strtoupper( preg_replace('/\s+/','',$_POST['registration']??'') );
-    if ( ! $reg ) wp_send_json_error(['message'=>'Enter a registration first.']);
-    if ( $s['lookup_provider'] === 'manual' ) wp_send_json_error(['message'=>'Vehicle lookup is set to Manual Only in Motoplus Settings.']);
-    if ( empty($s['lookup_api_key']) ) wp_send_json_error(['message'=>'Add your Lookup API key in Motoplus → Settings.']);
+    $reg = strtoupper( preg_replace('/\s+/', '', $_POST['registration'] ?? '') );
 
-    // DVLA VES endpoint
-    if ( $s['lookup_provider'] === 'dvla' ) {
+    if ( ! $reg ) {
+        wp_send_json_error(['message' => 'Please enter a registration number.']);
+    }
+
+    $api_key  = trim( $s['lookup_api_key'] ?? '' );
+    $provider = $s['lookup_provider'] ?? 'manual';
+
+    // ── UK Vehicle Data (ukvd) ────────────────────────────────────────────────
+    if ( $provider === 'ukvd' ) {
+        if ( empty($api_key) ) {
+            wp_send_json_error(['message' => 'No API key set. Add your UK Vehicle Data API key in Motoplus → Settings → Integrations.']);
+        }
+
+        $fields = [];
+        $errors = [];
+
+        // Try multiple data packages — VehicleData is the main one
+        $packages = ['VehicleData', 'VehicleAndMotHistory', 'FullVehicleData'];
+        $v_data   = null;
+
+        foreach ( $packages as $package ) {
+            $url = add_query_arg([
+                'v'             => 2,
+                'api_nullitems' => 1,
+                'auth_apikey'   => $api_key,
+                'user_tag'      => 'motoplus_lookup',
+                'key_VRM'       => $reg,
+            ], "https://uk1.ukvehicledata.co.uk/api/datapackage/{$package}");
+
+            $response = wp_remote_get( $url, [
+                'timeout'   => 15,
+                'sslverify' => true,
+                'headers'   => ['Accept' => 'application/json'],
+            ]);
+
+            if ( is_wp_error($response) ) {
+                $errors[] = $response->get_error_message();
+                continue;
+            }
+
+            $http_code = wp_remote_retrieve_response_code($response);
+            if ( $http_code !== 200 ) {
+                $errors[] = "Package {$package} returned HTTP {$http_code}";
+                continue;
+            }
+
+            $body = json_decode( wp_remote_retrieve_body($response), true );
+
+            // Check for API-level errors
+            if ( ! empty($body['Response']['StatusCode']) && $body['Response']['StatusCode'] !== 'Success' ) {
+                $status_msg = $body['Response']['StatusMessage'] ?? $body['Response']['StatusCode'];
+                if ( strpos($status_msg, 'not found') !== false || strpos($status_msg, 'No data') !== false ) {
+                    wp_send_json_error(['message' => "Registration {$reg} not found. Please check the reg and try again."]);
+                }
+                $errors[] = "Package {$package}: {$status_msg}";
+                continue;
+            }
+
+            // Success — use this data
+            $v_data   = $body;
+            break;
+        }
+
+        if ( ! $v_data ) {
+            $error_msg = ! empty($errors) ? implode('; ', $errors) : 'Could not retrieve vehicle data.';
+            wp_send_json_error(['message' => $error_msg]);
+        }
+
+        // ── Parse the response ────────────────────────────────────────────────
+        // UKVD nests data under different keys depending on package
+        $data = $v_data['Response']['DataItems'] ?? $v_data['DataItems'] ?? $v_data ?? [];
+
+        // Helper to safely get nested values
+        $get = function($path, $data) {
+            $keys  = explode('.', $path);
+            $value = $data;
+            foreach ($keys as $key) {
+                if ( is_array($value) && array_key_exists($key, $value) ) {
+                    $value = $value[$key];
+                } else {
+                    return null;
+                }
+            }
+            return $value !== '' ? $value : null;
+        };
+
+        // ── Make ──────────────────────────────────────────────────────────────
+        $make = $get('VehicleRegistration.Make', $data)
+             ?? $get('Make', $data)
+             ?? $get('SmmtDetails.Make', $data)
+             ?? null;
+
+        // ── Model ─────────────────────────────────────────────────────────────
+        $model = $get('VehicleRegistration.Model', $data)
+              ?? $get('Model', $data)
+              ?? $get('SmmtDetails.Roadplan', $data)
+              ?? null;
+
+        // ── Variant ───────────────────────────────────────────────────────────
+        $variant = $get('SmmtDetails.MarketingDesc', $data)
+                ?? $get('VehicleRegistration.ModelVariant', $data)
+                ?? null;
+
+        // ── Year ──────────────────────────────────────────────────────────────
+        $year_full = $get('VehicleRegistration.YearOfManufacture', $data)
+                  ?? $get('YearOfManufacture', $data)
+                  ?? null;
+        $year = $year_full ? substr((string)$year_full, 0, 4) : null;
+
+        // ── Colour ────────────────────────────────────────────────────────────
+        $colour = $get('VehicleRegistration.Colour', $data)
+               ?? $get('Colour', $data)
+               ?? null;
+
+        // ── Fuel type ─────────────────────────────────────────────────────────
+        $fuel_raw = $get('VehicleRegistration.FuelType', $data)
+                 ?? $get('FuelType', $data)
+                 ?? null;
+        $fuel = null;
+        if ($fuel_raw) {
+            $fuel_map = [
+                'PETROL' => 'Petrol', 'DIESEL' => 'Diesel',
+                'ELECTRIC' => 'Electric', 'HYBRID ELECTRIC' => 'Hybrid',
+                'PLUG-IN HYBRID EV (PETROL)' => 'Plug-in Hybrid',
+                'PLUG-IN HYBRID EV (DIESEL)' => 'Plug-in Hybrid',
+                'GAS' => 'Petrol', 'HEAVY OIL' => 'Diesel',
+            ];
+            $fuel = $fuel_map[strtoupper($fuel_raw)] ?? ucfirst(strtolower($fuel_raw));
+        }
+
+        // ── Transmission ──────────────────────────────────────────────────────
+        $gearbox_raw = $get('TechnicalDetails.Performance.Transmission', $data)
+                    ?? $get('SmmtDetails.TransmissionType', $data)
+                    ?? $get('Transmission', $data)
+                    ?? null;
+        $gearbox = null;
+        if ($gearbox_raw) {
+            $g = strtoupper($gearbox_raw);
+            if (strpos($g,'AUTO') !== false) $gearbox = 'Automatic';
+            elseif (strpos($g,'MANUAL') !== false || strpos($g,'MANUAL') !== false) $gearbox = 'Manual';
+            elseif (strpos($g,'SEMI') !== false || strpos($g,'CVT') !== false) $gearbox = 'Semi-Automatic';
+            else $gearbox = ucfirst(strtolower($gearbox_raw));
+        }
+
+        // ── Engine size ───────────────────────────────────────────────────────
+        $cc = $get('TechnicalDetails.Performance.EngineCapacity', $data)
+           ?? $get('VehicleRegistration.EngineCapacity', $data)
+           ?? $get('EngineCapacity', $data)
+           ?? null;
+        $engine = null;
+        if ($cc) {
+            $litres = round((int)$cc / 1000, 1);
+            $engine = $litres . 'L';
+        }
+
+        // ── Body type ─────────────────────────────────────────────────────────
+        $body_type = $get('SmmtDetails.BodyStyle', $data)
+                  ?? $get('VehicleRegistration.BodyType', $data)
+                  ?? $get('BodyType', $data)
+                  ?? null;
+        if ($body_type) $body_type = ucfirst(strtolower($body_type));
+
+        // ── Doors ─────────────────────────────────────────────────────────────
+        $doors = $get('SmmtDetails.DoorPlan', $data)
+              ?? $get('TechnicalDetails.Dimensions.NumberOfDoors', $data)
+              ?? null;
+        if ($doors) {
+            // Extract just the number if it's something like "4 DOOR"
+            preg_match('/\d+/', (string)$doors, $dm);
+            $doors = $dm[0] ?? null;
+        }
+
+        // ── CO2 ───────────────────────────────────────────────────────────────
+        $co2_raw = $get('TechnicalDetails.Performance.Co2Emissions', $data)
+                ?? $get('VehicleRegistration.Co2Emissions', $data)
+                ?? null;
+        $co2 = $co2_raw ? ((int)$co2_raw . ' g/km') : null;
+
+        // ── Road tax / tax band ───────────────────────────────────────────────
+        $tax_band = $get('VehicleRegistration.VehicleClass', $data)
+                 ?? null;
+        $tax_status = $get('VehicleRegistration.TaxStatus', $data) ?? null;
+        $tax_due    = $get('VehicleRegistration.TaxDueDate', $data) ?? null;
+        $road_tax   = null;
+        if ($tax_status && $tax_due) {
+            $road_tax = ucfirst(strtolower($tax_status)) . ' (expires ' . date('M Y', strtotime($tax_due)) . ')';
+        } elseif ($tax_status) {
+            $road_tax = ucfirst(strtolower($tax_status));
+        }
+
+        // ── MOT expiry ────────────────────────────────────────────────────────
+        $mot_expiry = $get('VehicleRegistration.MotExpiryDate', $data)
+                   ?? $get('MotHistory.RecordList.0.ExpiryDate', $data)
+                   ?? null;
+        if ($mot_expiry) {
+            $mot_expiry = date('F Y', strtotime($mot_expiry));
+        }
+
+        // ── Number of keepers (owners) ────────────────────────────────────────
+        $owners = $get('VehicleHistory.NumberOfPreviousKeepers', $data)
+               ?? $get('KeeperChanges.NumberOfKeepers', $data)
+               ?? null;
+
+        // ── Build fields array — only include non-null values ─────────────────
+        $fields = array_filter([
+            'registration' => $reg,
+            'make'         => $make ? ucwords(strtolower($make)) : null,
+            'model'        => $model ? ucwords(strtolower($model)) : null,
+            'variant'      => $variant,
+            'year'         => $year,
+            'colour'       => $colour ? ucfirst(strtolower($colour)) : null,
+            'fuel'         => $fuel,
+            'gearbox'      => $gearbox,
+            'engine'       => $engine,
+            'body'         => $body_type,
+            'doors'        => $doors,
+            'co2'          => $co2,
+            'road_tax'     => $road_tax,
+            'tax_band'     => $tax_band,
+            'mot_expiry'   => $mot_expiry,
+            'owners'       => $owners,
+        ], function($v) { return $v !== null && $v !== ''; });
+
+        if ( empty($fields) || ( empty($fields['make']) && empty($fields['model']) ) ) {
+            wp_send_json_error(['message' => "Registration found but no vehicle data returned. Check your data package in the UKVD control panel."]);
+        }
+
+        wp_send_json_success([
+            'fields'    => $fields,
+            'raw_count' => count($fields),
+            'message'   => 'Vehicle data retrieved successfully',
+        ]);
+    }
+
+    // ── DVLA VES (legacy) ─────────────────────────────────────────────────────
+    if ( $provider === 'dvla' ) {
+        if ( empty($api_key) ) {
+            wp_send_json_error(['message' => 'No DVLA API key set.']);
+        }
         $resp = wp_remote_post('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles',[
             'timeout' => 10,
-            'headers' => ['x-api-key'=>$s['lookup_api_key'],'Content-Type'=>'application/json'],
+            'headers' => ['x-api-key'=>$api_key,'Content-Type'=>'application/json'],
             'body'    => wp_json_encode(['registrationNumber'=>$reg]),
         ]);
         if ( is_wp_error($resp) ) wp_send_json_error(['message'=>$resp->get_error_message()]);
         $code = wp_remote_retrieve_response_code($resp);
-        if ($code !== 200) wp_send_json_error(['message'=>'DVLA returned HTTP '.$code.'. Check your API key.']);
+        if ($code !== 200) wp_send_json_error(['message'=>'DVLA returned HTTP '.$code.'.']);
         $v = json_decode(wp_remote_retrieve_body($resp),true);
         wp_send_json_success(['fields'=>[
             'registration' => $reg,
-            'make'         => ucfirst(strtolower($v['make'] ?? '')),
+            'make'         => ucwords(strtolower($v['make'] ?? '')),
             'fuel'         => ucfirst(strtolower($v['fuelType'] ?? '')),
             'colour'       => ucfirst(strtolower($v['colour'] ?? '')),
-            'year'         => substr($v['monthOfFirstRegistration'] ?? '',0,4),
+            'year'         => substr($v['monthOfFirstRegistration'] ?? '', 0, 4),
         ]]);
     }
 
-    wp_send_json_error(['message'=>'Lookup provider framework ready. Connect the selected provider once your API access is active.']);
+    wp_send_json_error(['message' => 'Lookup is set to Manual. Add your UK Vehicle Data API key in Motoplus → Settings.']);
 }
+
 
 // ── Admin: Import from UsedCarsNI URL ─────────────────────────────────────────
 add_action( 'wp_ajax_motoplus_import_usedcarsni', 'motoplus_ajax_import_url' );
