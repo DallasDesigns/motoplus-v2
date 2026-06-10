@@ -498,3 +498,84 @@ ul.mp-card-specs li::marker,
 .mp-keyspec-icon svg {
     color: var(--mp-muted);
 }
+
+/* ═══════════════════════════════════════════════════
+   STICKY SIDEBAR
+   ═══════════════════════════════════════════════════ */
+.mp-sidebar-sticky {
+    position: sticky;
+    top: 90px; /* clears fixed headers */
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+@media(max-width:960px) {
+    .mp-sidebar-sticky { position: static; }
+}
+
+/* ═══════════════════════════════════════════════════
+   FINANCE TEASER
+   ═══════════════════════════════════════════════════ */
+/* In title bar */
+.mp-finance-teaser {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mp-muted);
+    margin-top: 6px;
+}
+.mp-finance-teaser span {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: .7;
+}
+
+/* In sidebar price card */
+.mp-price-finance {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mp-muted);
+    padding: 8px 16px;
+    border-top: 1px solid var(--mp-border);
+    background: var(--mp-page-bg);
+    margin-top: 2px;
+}
+.mp-price-finance span {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: .7;
+}
+
+/* ═══════════════════════════════════════════════════
+   VIDEO BLOCK
+   ═══════════════════════════════════════════════════ */
+.mp-video-block {
+    background: var(--mp-card-bg);
+    border: 1px solid var(--mp-border);
+    border-radius: var(--mp-card-radius);
+    padding: 24px 26px;
+    margin-bottom: 24px;
+}
+.mp-video-block h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--mp-border);
+    letter-spacing: -.01em;
+}
+.mp-video-block iframe {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════════
+   LISTED BADGE + DAYS LISTED
+   ═══════════════════════════════════════════════════ */
+.mp-listed-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mp-muted);
+    padding: 2px 0;
+}

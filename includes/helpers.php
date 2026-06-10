@@ -113,6 +113,7 @@ function motoplus_vehicle_fields() {
         'seats'           => ['label'=>'Seats',               'type'=>'number',   'placeholder'=>'5',          'group'=>'Extra Details'],
         'location'        => ['label'=>'Location',            'type'=>'text',     'placeholder'=>'Belfast',    'group'=>'Extra Details'],
         'payload'         => ['label'=>'Payload',             'type'=>'text',     'placeholder'=>'741kg',      'group'=>'Extra Details'],
+        'video_url'       => ['label'=>'Video URL',           'type'=>'text',     'placeholder'=>'https://youtube.com/watch?v=...', 'group'=>'Images'],
         'gallery'         => ['label'=>'Gallery',             'type'=>'hidden',   'group'=>'Images'],
     ];
 }
