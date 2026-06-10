@@ -17,53 +17,40 @@ function motoplus_single_content( $content ) {
     $reduced  = ($prev && $price && (int)$prev > (int)$price);
     $is_new   = motoplus_is_new_arrival($id);
 
-    // ── Finance text — manual field takes priority, auto-calc as fallback ──────
-    $finance_text    = trim( motoplus_meta($id, 'finance_text') );
+    // Finance text — manual field or auto fallback
+    $finance_text    = trim(motoplus_meta($id, 'finance_text'));
     $finance_monthly = '';
-    if ( $finance_text ) {
-        $finance_monthly = $finance_text; // dealer-entered text shown as-is
-    } elseif ( $price && (int)$price > 1000 ) {
-        $mo = ceil( ((int)$price * 1.08) / 48 );
+    if ($finance_text) {
+        $finance_monthly = $finance_text;
+    } elseif ($price && (int)$price > 1000) {
+        $mo = ceil(((int)$price * 1.08) / 48);
         $finance_monthly = 'From £' . number_format($mo) . '/month';
     }
 
-    // ── Days listed ───────────────────────────────────────────────────────────
+    // Days listed
     $post_date   = get_post_time('U', true, $id);
     $days_listed = floor((time() - $post_date) / DAY_IN_SECONDS);
     $listed_text = $days_listed === 0 ? 'Listed today' : ($days_listed === 1 ? 'Listed yesterday' : "Listed {$days_listed} days ago");
 
-    // ── Price reduction age ───────────────────────────────────────────────────
-    $price_reduced_date = get_post_meta($id, MOTOPLUS_META.'price_reduced_date', true);
-    $reduced_days       = '';
-    if ($reduced && $price_reduced_date) {
-        $rd = floor((time() - (int)$price_reduced_date) / DAY_IN_SECONDS);
-        $reduced_days = $rd <= 0 ? 'Reduced today' : ($rd === 1 ? 'Reduced yesterday' : "Reduced {$rd} days ago");
-    } elseif ($reduced) {
-        $reduced_days = 'Recently reduced';
-    }
-
-    // ── Video ─────────────────────────────────────────────────────────────────
-    $video_url    = trim(motoplus_meta($id, 'video_url'));
-    $video_embed  = '';
+    // Video
+    $video_url   = trim(motoplus_meta($id, 'video_url'));
+    $video_embed = '';
     if ($video_url) {
-        // YouTube
         if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $video_url, $m)) {
-            $video_embed = '<iframe width="100%" height="380" src="https://www.youtube.com/embed/'.esc_attr($m[1]).'?rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="border-radius:10px;display:block"></iframe>';
-        }
-        // Vimeo
-        elseif (preg_match('/vimeo\.com\/(\d+)/', $video_url, $m)) {
-            $video_embed = '<iframe width="100%" height="380" src="https://player.vimeo.com/video/'.esc_attr($m[1]).'" frameborder="0" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen style="border-radius:10px;display:block"></iframe>';
+            $video_embed = '<iframe width="100%" height="380" src="https://www.youtube.com/embed/' . esc_attr($m[1]) . '?rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="border-radius:10px;display:block"></iframe>';
+        } elseif (preg_match('/vimeo\.com\/(\d+)/', $video_url, $m)) {
+            $video_embed = '<iframe width="100%" height="380" src="https://player.vimeo.com/video/' . esc_attr($m[1]) . '" frameborder="0" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen style="border-radius:10px;display:block"></iframe>';
         }
     }
 
-    // ── Gallery ───────────────────────────────────────────────────────────────
-    $gallery_raw = motoplus_meta($id,'gallery');
-    $gallery_ids = array_filter(array_map('absint', explode(',', $gallery_raw ?: '')));
+    // Gallery
+    $gallery_raw  = motoplus_meta($id,'gallery');
+    $gallery_ids  = array_filter(array_map('absint', explode(',', $gallery_raw ?: '')));
     if (!$gallery_ids && has_post_thumbnail($id)) $gallery_ids = [get_post_thumbnail_id($id)];
     $gallery_ids  = array_values($gallery_ids);
     $gallery_count = count($gallery_ids);
 
-    // ── Spec groups ───────────────────────────────────────────────────────────
+    // Spec groups
     $spec_groups = [
         'Overview'            => ['make','model','variant','year','registration'],
         'Performance'         => ['engine','fuel','gearbox','body'],
@@ -72,16 +59,16 @@ function motoplus_single_content( $content ) {
         'Other'               => ['location','payload'],
     ];
 
-    // ── Highlights ────────────────────────────────────────────────────────────
+    // Highlights
     $highlights = [];
     if ($is_new)  $highlights[] = ['icon'=>'🆕','text'=>'New Arrival'];
-    if ($reduced) $highlights[] = ['icon'=>'💰','text'=>$reduced_days ?: 'Price Reduced'];
+    if ($reduced) $highlights[] = ['icon'=>'💰','text'=>'Price Reduced'];
     if (stripos(motoplus_meta($id,'service_history'),'Full')!==false) $highlights[]=['icon'=>'📋','text'=>'Full Service History'];
     if ((int)motoplus_meta($id,'owners')===1) $highlights[]=['icon'=>'👤','text'=>'1 Previous Owner'];
     $mil = (int)motoplus_meta($id,'mileage');
     if ($mil>0 && $mil<40000) $highlights[]=['icon'=>'⬇️','text'=>'Low Mileage'];
 
-    // ── Settings shortcuts ────────────────────────────────────────────────────
+    // Settings shortcuts
     $show_phone      = ($settings['product_show_phone']       ?? '1') !== '0';
     $show_whatsapp   = ($settings['product_show_whatsapp']    ?? '1') !== '0';
     $show_enquiry    = ($settings['product_show_enquiry_form']?? '1') !== '0';
@@ -100,7 +87,7 @@ function motoplus_single_content( $content ) {
     $enquiry_subtitle = $settings['product_enquiry_subtitle']  ?: 'Complete the form below and we\'ll get back to you as soon as possible.';
     $similar_title    = $settings['product_similar_title']     ?: 'Similar Vehicles';
 
-    // ── WhatsApp ──────────────────────────────────────────────────────────────
+    // WhatsApp
     $wa_raw    = trim($settings['whatsapp_number'] ?? $settings['dealer_phone'] ?? '');
     $wa_number = preg_replace('/[^0-9+]/', '', $wa_raw);
     if ($wa_number && $wa_number[0] === '0') $wa_number = '44' . ltrim($wa_number, '0');
@@ -123,27 +110,23 @@ function motoplus_single_content( $content ) {
         </nav>
         <?php endif; ?>
 
-        <!-- Title bar -->
+        <!-- Title bar: title left, price right, badges below -->
         <div class="mp-single-titlebar">
-            <!-- Row 1: title + price -->
-            <div class="mp-single-titlebar__top">
-                <div class="mp-single-titlebar__left">
-                    <h1 class="mp-single-h1"><?php the_title(); ?></h1>
-                </div>
+            <div class="mp-single-titlebar__inner">
+                <h1 class="mp-single-h1"><?php the_title(); ?></h1>
                 <div class="mp-single-titlebar__price">
                     <?php if ($reduced): ?>
-                    <span class="mp-was-price">Was <?php echo esc_html(motoplus_money($prev)); ?></span>
+                    <div class="mp-was-price">Was <?php echo esc_html(motoplus_money($prev)); ?></div>
                     <?php endif; ?>
-                    <span class="mp-sale-price"><?php echo esc_html(motoplus_money($price)); ?></span>
-                    <?php if ($finance_monthly) : ?>
-                    <span class="mp-finance-teaser"><?php echo esc_html($finance_monthly); ?></span>
+                    <div class="mp-sale-price"><?php echo esc_html(motoplus_money($price)); ?></div>
+                    <?php if ($reduced): ?>
+                    <div class="mp-saving">Save <?php echo esc_html(motoplus_money((int)$prev-(int)$price)); ?></div>
                     <?php endif; ?>
                 </div>
             </div>
-            <!-- Row 2: badges on their own line -->
             <div class="mp-single-meta">
                 <?php $reg = motoplus_meta($id,'registration'); if($reg): ?>
-                <span style="display:inline-block;font-family:'Roboto Condensed','Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#111;background:#f5c400;border:2px solid #333;border-radius:4px;padding:3px 12px;line-height:1.4;vertical-align:middle"><?php echo esc_html(strtoupper($reg)); ?></span>
+                <span style="display:inline-block;font-family:'Roboto Condensed','Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#111;background:#f5c400;border:2px solid #333;border-radius:4px;padding:3px 12px;line-height:1.5;vertical-align:middle"><?php echo esc_html(strtoupper($reg)); ?></span>
                 <?php endif; ?>
                 <span class="mp-status-pill mp-status-pill--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
                 <span class="mp-listed-badge"><?php echo esc_html($listed_text); ?></span>
@@ -153,7 +136,7 @@ function motoplus_single_content( $content ) {
         <!-- Main two-column layout -->
         <div class="mp-single-body">
 
-            <!-- LEFT: Gallery + specs + description -->
+            <!-- LEFT -->
             <div class="mp-single-left">
 
                 <!-- Gallery -->
@@ -171,16 +154,12 @@ function motoplus_single_content( $content ) {
                         <span class="mp-img-badge mp-img-badge--new">New In</span>
                         <?php endif; ?>
                         <?php if ($gallery_count > 1): ?>
-                        <div class="mp-img-counter">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                            <span id="mp-img-num">1</span> / <?php echo $gallery_count; ?>
-                        </div>
+                        <div class="mp-img-counter"><span id="mp-img-num">1</span> / <?php echo $gallery_count; ?></div>
                         <?php endif; ?>
                         <?php else : ?>
                         <?php echo motoplus_vehicle_image($id,'large'); ?>
                         <?php endif; ?>
                     </div>
-
                     <?php if ($gallery_count > 1) : ?>
                     <div class="mp-thumb-strip">
                         <?php foreach ($gallery_ids as $i => $img_id) : ?>
@@ -195,7 +174,7 @@ function motoplus_single_content( $content ) {
                     <?php endif; ?>
                 </div>
 
-                <!-- Video embed -->
+                <!-- Video -->
                 <?php if ($video_embed) : ?>
                 <div class="mp-video-block">
                     <h2>Video Walkaround</h2>
@@ -273,7 +252,7 @@ function motoplus_single_content( $content ) {
             <aside class="mp-single-right">
                 <div class="mp-sidebar-sticky" id="mp-sidebar-sticky">
 
-                    <!-- Price card with CTAs -->
+                    <!-- Price card -->
                     <div class="mp-price-card">
                         <div class="mp-price-card__price">
                             <?php if ($reduced): ?>
@@ -281,7 +260,7 @@ function motoplus_single_content( $content ) {
                             <?php endif; ?>
                             <span class="mp-price-main"><?php echo esc_html(motoplus_money($price)); ?></span>
                             <?php if ($finance_monthly) : ?>
-                            <div class="mp-price-finance">From <?php echo esc_html($finance_monthly); ?>/mo <span>est.</span></div>
+                            <div class="mp-price-finance"><?php echo esc_html($finance_monthly); ?></div>
                             <?php endif; ?>
                         </div>
 
@@ -344,7 +323,7 @@ function motoplus_single_content( $content ) {
                     </div>
 
                 </div><!-- /.mp-sidebar-sticky -->
-            </aside><!-- /.mp-single-right -->
+            </aside>
         </div><!-- /.mp-single-body -->
 
         <!-- Enquiry form -->
