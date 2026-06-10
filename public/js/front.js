@@ -148,30 +148,15 @@ jQuery(function ($) {
         }
     });
 
-    // ── Sticky sidebar ───────────────────────────────────────────────────────
-    var $sticky = $('#mp-sidebar-sticky');
-    if ($sticky.length) {
-        var $aside      = $sticky.closest('.mp-single-right');
-        var $body       = $('.mp-single-body');
-        var headerH     = 90;
-        var lastScrollY = 0;
-
-        function updateSticky() {
-            if ($(window).width() < 960) return;
-            var bodyBottom  = $body.offset().top + $body.outerHeight();
-            var stickyH     = $sticky.outerHeight();
-            var maxTop      = bodyBottom - stickyH - $body.offset().top;
-            var scrollTop   = $(window).scrollTop();
-            var naturalTop  = $aside.offset().top - scrollTop;
-
-            if (naturalTop > headerH) {
-                $sticky.css({ position: 'sticky', top: headerH + 'px' });
-            } else {
-                var top = Math.min(headerH, maxTop);
-                $sticky.css({ position: 'sticky', top: Math.max(headerH, 0) + 'px' });
+    // ── Sticky sidebar — CSS handles this, JS just ensures no parent clips it ──
+    if ($('#mp-sidebar-sticky').length) {
+        // Walk up and remove any overflow:hidden that would break position:sticky
+        $('#mp-sidebar-sticky').parents().each(function() {
+            var $el = $(this);
+            var overflow = $el.css('overflow');
+            var overflowY = $el.css('overflow-y');
+            if (overflow === 'hidden' || overflowY === 'hidden') {
+                $el.css('overflow', 'visible');
             }
-        }
-
-        $(window).on('scroll resize', updateSticky);
-        updateSticky();
+        });
     }

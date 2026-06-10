@@ -17,11 +17,14 @@ function motoplus_single_content( $content ) {
     $reduced  = ($prev && $price && (int)$prev > (int)$price);
     $is_new   = motoplus_is_new_arrival($id);
 
-    // ── Finance estimate ──────────────────────────────────────────────────────
-    // Simple formula: (price * 1.08) / 48 months, rounded to nearest £
+    // ── Finance text — manual field takes priority, auto-calc as fallback ──────
+    $finance_text    = trim( motoplus_meta($id, 'finance_text') );
     $finance_monthly = '';
-    if ( $price && (int)$price > 1000 ) {
-        $finance_monthly = '£' . number_format( ceil( ((int)$price * 1.08) / 48 ), 0 );
+    if ( $finance_text ) {
+        $finance_monthly = $finance_text; // dealer-entered text shown as-is
+    } elseif ( $price && (int)$price > 1000 ) {
+        $mo = ceil( ((int)$price * 1.08) / 48 );
+        $finance_monthly = 'From £' . number_format($mo) . '/month';
     }
 
     // ── Days listed ───────────────────────────────────────────────────────────
@@ -122,24 +125,28 @@ function motoplus_single_content( $content ) {
 
         <!-- Title bar -->
         <div class="mp-single-titlebar">
-            <div class="mp-single-titlebar__left">
-                <h1 class="mp-single-h1"><?php the_title(); ?></h1>
-                <div class="mp-single-meta">
-                    <?php $reg = motoplus_meta($id,'registration'); if($reg): ?>
-                    <span style="display:inline-block;font-family:'Roboto Condensed','Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#111;background:#f5c400;border:3px solid #333;border-radius:5px;padding:4px 14px;line-height:1.4;box-shadow:0 2px 5px rgba(0,0,0,.2);margin-right:6px;vertical-align:middle"><?php echo esc_html(strtoupper($reg)); ?></span>
+            <!-- Row 1: title + price -->
+            <div class="mp-single-titlebar__top">
+                <div class="mp-single-titlebar__left">
+                    <h1 class="mp-single-h1"><?php the_title(); ?></h1>
+                </div>
+                <div class="mp-single-titlebar__price">
+                    <?php if ($reduced): ?>
+                    <span class="mp-was-price">Was <?php echo esc_html(motoplus_money($prev)); ?></span>
                     <?php endif; ?>
-                    <span class="mp-status-pill mp-status-pill--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
-                    <span class="mp-listed-badge"><?php echo esc_html($listed_text); ?></span>
+                    <span class="mp-sale-price"><?php echo esc_html(motoplus_money($price)); ?></span>
+                    <?php if ($finance_monthly) : ?>
+                    <span class="mp-finance-teaser"><?php echo esc_html($finance_monthly); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
-            <div class="mp-single-titlebar__price">
-                <?php if ($reduced): ?>
-                <div class="mp-was-price">Was <?php echo esc_html(motoplus_money($prev)); ?></div>
+            <!-- Row 2: badges on their own line -->
+            <div class="mp-single-meta">
+                <?php $reg = motoplus_meta($id,'registration'); if($reg): ?>
+                <span style="display:inline-block;font-family:'Roboto Condensed','Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#111;background:#f5c400;border:2px solid #333;border-radius:4px;padding:3px 12px;line-height:1.4;vertical-align:middle"><?php echo esc_html(strtoupper($reg)); ?></span>
                 <?php endif; ?>
-                <div class="mp-sale-price"><?php echo esc_html(motoplus_money($price)); ?></div>
-                <?php if ($finance_monthly) : ?>
-                <div class="mp-finance-teaser">From <?php echo esc_html($finance_monthly); ?>/month <span>Representative APR 8%</span></div>
-                <?php endif; ?>
+                <span class="mp-status-pill mp-status-pill--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
+                <span class="mp-listed-badge"><?php echo esc_html($listed_text); ?></span>
             </div>
         </div>
 

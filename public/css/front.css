@@ -162,46 +162,36 @@ ul.mp-card-specs li::marker,
 
 /* Title bar */
 .mp-single-titlebar {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  flex-wrap: wrap; gap: 12px;
-  padding: 18px 0 20px;
+  padding: 16px 0 20px;
   border-bottom: 2px solid var(--mp-border);
   margin-bottom: 24px;
 }
-.mp-single-titlebar__left { flex: 1; min-width: 0; }
-.mp-single-h1 { font-size: clamp(20px,3.5vw,30px); font-weight: 800; margin: 0 0 8px; line-height: 1.2; letter-spacing: -.02em; }
-.mp-single-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.mp-reg-plate {
-  display: inline-block !important;
-  font-family: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  font-stretch: condensed !important;
-  letter-spacing: .18em !important;
-  text-transform: uppercase !important;
-  color: #111 !important;
-  background: #f5c400 !important;
-  border: 3px solid #333 !important;
-  border-radius: 5px !important;
-  padding: 5px 16px !important;
-  line-height: 1.3 !important;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15), 0 2px 5px rgba(0,0,0,.2) !important;
-  vertical-align: middle;
-  text-decoration: none !important;
-  margin-right: 4px;
+.mp-single-titlebar__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
 }
-.mp-status-pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-.mp-status-pill--in-stock    { background: #dcfce7; color: #166534; }
-.mp-status-pill--reserved    { background: #fef9c3; color: #854d0e; }
-.mp-status-pill--sold        { background: #f1f5f9; color: #475569; }
-.mp-status-pill--coming-soon { background: #ede9fe; color: #5b21b6; }
-.mp-single-titlebar__price { text-align: right; flex-shrink: 0; }
-.mp-was-price { font-size: 14px; color: var(--mp-muted); text-decoration: line-through; margin-bottom: 2px; }
-.mp-sale-price { font-size: clamp(28px,5vw,40px); font-weight: 900; color: var(--mp-accent); line-height: 1; letter-spacing: -.02em; }
-.mp-saving { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; background: #dcfce7; color: #166534; padding: 2px 9px; border-radius: 10px; }
+.mp-single-titlebar__left { flex: 1; min-width: 0; }
+.mp-single-h1 {
+  font-size: clamp(18px,3vw,28px);
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+.mp-single-titlebar__price {
+  text-align: right;
+  flex-shrink: 0;
+  max-width: 48%;
+}
+.mp-was-price { font-size: 13px; color: var(--mp-muted); text-decoration: line-through; margin-bottom: 2px; display: block; }
+.mp-sale-price { font-size: clamp(22px,4vw,38px); font-weight: 900; color: var(--mp-accent); line-height: 1.1; letter-spacing: -.02em; display: block; }
+.mp-saving { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; }
 
 /* ── Two-column body layout ── */
-.mp-single-body { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; }
+.mp-single-body { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; overflow: visible; }
 @media(max-width:960px) { .mp-single-body { grid-template-columns: 1fr; } }
 
 /* ── LEFT COLUMN ── */
@@ -502,15 +492,41 @@ ul.mp-card-specs li::marker,
 /* ═══════════════════════════════════════════════════
    STICKY SIDEBAR
    ═══════════════════════════════════════════════════ */
+
+/* The aside itself must be position:relative with full height */
+.mp-single-right {
+    position: relative;
+}
+
+/* Sticky wrapper — sticks to viewport top as you scroll */
 .mp-sidebar-sticky {
+    position: -webkit-sticky;
     position: sticky;
-    top: 90px; /* clears fixed headers */
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    /* Hide scrollbar but keep scroll */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
+.mp-sidebar-sticky::-webkit-scrollbar { display: none; }
+
+/* Parent grid MUST NOT have overflow:hidden — ensure it doesn't */
+.mp-single-body {
+    overflow: visible !important;
+    align-items: start;
+}
+
 @media(max-width:960px) {
-    .mp-sidebar-sticky { position: static; }
+    .mp-sidebar-sticky {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -578,4 +594,67 @@ ul.mp-card-specs li::marker,
     font-weight: 500;
     color: var(--mp-muted);
     padding: 2px 0;
+}
+
+/* ── Title bar meta row (badges) ── */
+.mp-single-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+.mp-status-pill {
+  display: inline-block !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+  white-space: nowrap !important;
+}
+.mp-status-pill--in-stock    { background: #dcfce7 !important; color: #166534 !important; }
+.mp-status-pill--reserved    { background: #fef9c3 !important; color: #854d0e !important; }
+.mp-status-pill--sold        { background: #f1f5f9 !important; color: #475569 !important; }
+.mp-status-pill--coming-soon { background: #ede9fe !important; color: #5b21b6 !important; }
+
+/* Listed badge — single line */
+.mp-listed-badge {
+  display: inline-block !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--mp-muted) !important;
+  white-space: nowrap !important;
+  line-height: 1.4 !important;
+}
+
+/* Finance teaser — title bar */
+.mp-finance-teaser {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--mp-muted) !important;
+  margin-top: 5px !important;
+  display: block !important;
+  white-space: nowrap !important;
+}
+.mp-finance-teaser span {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  opacity: .7;
+}
+
+/* Mobile title bar fixes */
+@media(max-width:640px) {
+  .mp-single-titlebar__top {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mp-single-titlebar__price {
+    text-align: left;
+    max-width: 100%;
+  }
+  .mp-finance-teaser {
+    white-space: normal !important;
+    font-size: 12px !important;
+  }
 }
