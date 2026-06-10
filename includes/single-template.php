@@ -91,7 +91,7 @@ function motoplus_single_content( $content ) {
                 <h1 class="mp-single-h1"><?php the_title(); ?></h1>
                 <div class="mp-single-meta">
                     <?php $reg = motoplus_meta($id,'registration'); if($reg): ?>
-                    <span class="mp-reg-plate"><?php echo esc_html(strtoupper($reg)); ?></span>
+                    <span style="display:inline-block;font-family:'Roboto Condensed','Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#111;background:#f5c400;border:3px solid #333;border-radius:5px;padding:4px 14px;line-height:1.4;box-shadow:0 2px 5px rgba(0,0,0,.2);margin-right:6px;vertical-align:middle"><?php echo esc_html(strtoupper($reg)); ?></span>
                     <?php endif; ?>
                     <span class="mp-status-pill mp-status-pill--<?php echo sanitize_html_class(strtolower(str_replace(' ','-',$status))); ?>"><?php echo esc_html($status); ?></span>
                 </div>
