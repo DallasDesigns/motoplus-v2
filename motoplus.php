@@ -40,7 +40,9 @@ register_deactivation_hook( __FILE__, function() { flush_rewrite_rules(); } );
 // Enqueue frontend assets
 add_action( 'wp_enqueue_scripts', 'motoplus_enqueue_frontend' );
 function motoplus_enqueue_frontend() {
-    wp_enqueue_style(  'motoplus-front', MOTOPLUS_URL . 'public/css/front.css', [], MOTOPLUS_VERSION );
+    // Load Roboto Condensed for number plate
+    wp_enqueue_style( 'motoplus-fonts', 'https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&display=swap', [], null );
+    wp_enqueue_style(  'motoplus-front', MOTOPLUS_URL . 'public/css/front.css', ['motoplus-fonts'], MOTOPLUS_VERSION );
     wp_enqueue_script( 'motoplus-front', MOTOPLUS_URL . 'public/js/front.js',   ['jquery'], MOTOPLUS_VERSION, true );
     wp_localize_script( 'motoplus-front', 'motoplusFront', [
         'ajaxUrl' => admin_url( 'admin-ajax.php' ),

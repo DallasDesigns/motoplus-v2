@@ -172,22 +172,23 @@ ul.mp-card-specs li::marker,
 .mp-single-h1 { font-size: clamp(20px,3.5vw,30px); font-weight: 800; margin: 0 0 8px; line-height: 1.2; letter-spacing: -.02em; }
 .mp-single-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .mp-reg-plate {
-  display: inline-flex;
-  align-items: center;
-  font-family: 'Arial Narrow', Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: #1a1a1a;
-  background: #f5c400;
-  border: 2px solid #1a1a1a;
-  border-radius: 4px;
-  padding: 5px 14px;
-  box-shadow: 0 2px 4px rgba(0,0,0,.15);
-}
-.mp-reg-plate-text {
-  display: block;
+  display: inline-block !important;
+  font-family: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  font-stretch: condensed !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  color: #111 !important;
+  background: #f5c400 !important;
+  border: 3px solid #333 !important;
+  border-radius: 5px !important;
+  padding: 5px 16px !important;
+  line-height: 1.3 !important;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15), 0 2px 5px rgba(0,0,0,.2) !important;
+  vertical-align: middle;
+  text-decoration: none !important;
+  margin-right: 4px;
 }
 .mp-status-pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .mp-status-pill--in-stock    { background: #dcfce7; color: #166534; }
