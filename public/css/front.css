@@ -228,14 +228,8 @@ ul.mp-card-specs li::marker,
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.mp-sidebar-sticky::-webkit-scrollbar { display: none; }
-@media(max-width:960px) { .mp-sidebar-sticky { position: static; max-height: none; overflow: visible; } }
+@media(max-width:960px) { .mp-sidebar-sticky { position: static; } }
 
 /* Price card */
 .mp-price-card { background: var(--mp-card-bg); border: 1px solid var(--mp-border); border-radius: var(--mp-card-radius); overflow: hidden; }
