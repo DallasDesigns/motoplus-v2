@@ -172,9 +172,22 @@ ul.mp-card-specs li::marker,
 .mp-single-h1 { font-size: clamp(20px,3.5vw,30px); font-weight: 800; margin: 0 0 8px; line-height: 1.2; letter-spacing: -.02em; }
 .mp-single-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .mp-reg-plate {
-  font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700;
-  background: #fef08a; color: #1a1a1a; border: 1px solid #ca8a04;
-  padding: 3px 10px; border-radius: 4px; letter-spacing: .12em;
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  background: #f5c400;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
+  padding: 5px 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.15);
+}
+.mp-reg-plate-text {
+  display: block;
 }
 .mp-status-pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .mp-status-pill--in-stock    { background: #dcfce7; color: #166534; }
